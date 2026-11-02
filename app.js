@@ -3,7 +3,6 @@ let config;
 async function loadConfig() {
     const response = await fetch("config.json");
     config = await response.json();
-
     loadTasks();
 }
 
@@ -20,25 +19,52 @@ async function loadTasks() {
 
     const tasks = await response.json();
 
-const taskList = document.getElementById("task-list");
+    const taskList = document.getElementById("task-list");
+    taskList.innerHTML = "";
 
-taskList.innerHTML = "";
+    tasks.forEach(task => {
+        taskList.innerHTML += `
+            <div class="task-item" data-id="${task.id}">
+                <h3 class="task-title">${task.title}</h3>
 
-tasks.forEach(task => {
-    taskList.innerHTML += `
-        <div class="task-item" data-id="${task.id}">
-            <h3 class="task-title">${task.title}</h3>
-            <p class="task-description">${task.description}</p>
-            <p class="task-status">
-                ${task.completed ? "Completed" : "Incomplete"}
-            </p>
+                <p class="task-description">
+                    ${task.description || ""}
+                </p>
 
-            <button class="edit-task">Edit</button>
-            <button class="delete-task">Delete</button>
-            <button class="toggle-task">Toggle Status</button>
-        </div>
-    `;
-});
+                <p class="task-status">
+                    ${task.completed ? "Completed" : "Incomplete"}
+                </p>
+
+                <button class="edit-task">
+                    Edit
+                </button>
+
+                <button class="delete-task"
+                        onclick="deleteTask(${task.id})">
+                    Delete
+                </button>
+
+                <button class="toggle-task">
+                    Toggle Status
+                </button>
+            </div>
+        `;
+    });
+}
+
+async function deleteTask(id) {
+    await fetch(
+        `${config.supabaseUrl}/rest/v1/tasks?id=eq.${id}`,
+        {
+            method: "DELETE",
+            headers: {
+                "apikey": config.supabasePublishableKey,
+                "Authorization": `Bearer ${config.supabasePublishableKey}`
+            }
+        }
+    );
+
+    loadTasks();
 }
 
 document.getElementById("task-form").addEventListener("submit", async (e) => {
@@ -65,7 +91,6 @@ document.getElementById("task-form").addEventListener("submit", async (e) => {
     );
 
     document.getElementById("task-form").reset();
-
     loadTasks();
 });
 
