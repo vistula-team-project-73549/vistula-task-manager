@@ -3,7 +3,6 @@ let config;
 async function loadConfig() {
     const response = await fetch("config.json");
     config = await response.json();
-
     loadTasks();
 }
 
@@ -21,27 +20,61 @@ async function loadTasks() {
     const tasks = await response.json();
 
     const taskList = document.getElementById("task-list");
-
     taskList.innerHTML = "";
 
     tasks.forEach(task => {
-        taskList.innerHTML += `
-            <div class="task-item" data-id="${task.id}">
-                <h3 class="task-title">${task.title}</h3>
-                <p class="task-description">${task.description}</p>
-                <p class="task-status">
-                    ${task.completed ? "Completed" : "Incomplete"}
-                </p>
 
-                <button class="edit-task">Edit</button>
-                <button class="delete-task">Delete</button>
-                <button class="toggle-task">Toggle Status</button>
-            </div>
+        const taskDiv = document.createElement("div");
+        taskDiv.className = "task-item";
+        taskDiv.dataset.id = task.id;
+
+        taskDiv.innerHTML = `
+            <h3 class="task-title">${task.title}</h3>
+
+            <p class="task-description">
+                ${task.description || ""}
+            </p>
+
+            <p class="task-status">
+                ${task.completed ? "Completed" : "Incomplete"}
+            </p>
+
+            <button class="edit-task">
+                Edit
+            </button>
+
+            <button class="delete-task">
+                Delete
+            </button>
+
+            <button class="toggle-task">
+                Toggle Status
+            </button>
         `;
+
+        taskDiv.querySelector(".delete-task")
+            .addEventListener("click", async () => {
+
+                await fetch(
+                    `${config.supabaseUrl}/rest/v1/tasks?id=eq.${task.id}`,
+                    {
+                        method: "DELETE",
+                        headers: {
+                            "apikey": config.supabasePublishableKey,
+                            "Authorization": `Bearer ${config.supabasePublishableKey}`
+                        }
+                    }
+                );
+
+                loadTasks();
+            });
+
+        taskList.appendChild(taskDiv);
     });
 }
 
 document.getElementById("task-form").addEventListener("submit", async (e) => {
+
     e.preventDefault();
 
     const title = document.getElementById("task-title").value;
@@ -57,8 +90,8 @@ document.getElementById("task-form").addEventListener("submit", async (e) => {
                 "Authorization": `Bearer ${config.supabasePublishableKey}`
             },
             body: JSON.stringify({
-                title,
-                description,
+                title: title,
+                description: description,
                 completed: false
             })
         }
