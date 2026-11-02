@@ -21,12 +21,52 @@ async function loadTasks() {
     const tasks = await response.json();
 
     const taskList = document.getElementById("task-list");
+
     taskList.innerHTML = "";
 
     tasks.forEach(task => {
-        const taskElement = document.createElement("div");
-        taskElement.className = "task-item";
-        taskElement.setAttribute("data-id", task.id);
+        taskList.innerHTML += `
+            <div class="task-item" data-id="${task.id}">
+                <h3 class="task-title">${task.title}</h3>
+                <p class="task-description">${task.description}</p>
+                <p class="task-status">
+                    ${task.completed ? "Completed" : "Incomplete"}
+                </p>
 
-        taskElement.innerHTML = `
-            <h3 class="task-title">${task.title}
+                <button class="edit-task">Edit</button>
+                <button class="delete-task">Delete</button>
+                <button class="toggle-task">Toggle Status</button>
+            </div>
+        `;
+    });
+}
+
+document.getElementById("task-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const title = document.getElementById("task-title").value;
+    const description = document.getElementById("task-description").value;
+
+    await fetch(
+        `${config.supabaseUrl}/rest/v1/tasks`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "apikey": config.supabasePublishableKey,
+                "Authorization": `Bearer ${config.supabasePublishableKey}`
+            },
+            body: JSON.stringify({
+                title,
+                description,
+                completed: false
+            })
+        }
+    );
+
+    document.getElementById("task-form").reset();
+
+    loadTasks();
+});
+
+loadConfig();
