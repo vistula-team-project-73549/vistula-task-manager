@@ -30,26 +30,14 @@ async function loadTasks() {
 
         taskDiv.innerHTML = `
             <h3 class="task-title">${task.title}</h3>
-
-            <p class="task-description">
-                ${task.description || ""}
-            </p>
-
+            <p class="task-description">${task.description || ""}</p>
             <p class="task-status">
                 ${task.completed ? "Completed" : "Incomplete"}
             </p>
 
-            <button class="edit-task">
-                Edit
-            </button>
-
-            <button class="delete-task">
-                Delete
-            </button>
-
-            <button class="toggle-task">
-                Toggle Status
-            </button>
+            <button class="edit-task">Edit</button>
+            <button class="delete-task">Delete</button>
+            <button class="toggle-task">Toggle Status</button>
         `;
 
         taskDiv.querySelector(".delete-task")
@@ -63,6 +51,27 @@ async function loadTasks() {
                             "apikey": config.supabasePublishableKey,
                             "Authorization": `Bearer ${config.supabasePublishableKey}`
                         }
+                    }
+                );
+
+                loadTasks();
+            });
+
+        taskDiv.querySelector(".toggle-task")
+            .addEventListener("click", async () => {
+
+                await fetch(
+                    `${config.supabaseUrl}/rest/v1/tasks?id=eq.${task.id}`,
+                    {
+                        method: "PATCH",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "apikey": config.supabasePublishableKey,
+                            "Authorization": `Bearer ${config.supabasePublishableKey}`
+                        },
+                        body: JSON.stringify({
+                            completed: !task.completed
+                        })
                     }
                 );
 
