@@ -34,4 +34,4 @@ https://github.com/vistula-team-project-73549/vistula-task-manager/pull/1
 
 ### Outgoing Pull Request (My Contribution)
 
-PASTE_THE_LINK_TO_THE_PR_YOU_CREATED_IN_YOUR_PARTNER'S_REPOSITORY
+https://github.com/vistula-team-project-73200/vistula-task-manager/pull/1
